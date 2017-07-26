@@ -49,82 +49,50 @@ import java.lang.Math.*;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="UpgradedTeleOp", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
+@TeleOp(name="ReallyBadMeccanumOp", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
 //@Disabled
 public class MeccanumOp extends LinearOpMode
 {
+    DcMotor wheelF;
+    DcMotor wheelB;
     DcMotor wheelR;
     DcMotor wheelL;
-    DcMotor intake;
-    DcMotor launcher;
-    Servo intakeServo;
-    Servo beaconPresser;
 
-    ElapsedTime runtime;
 
 
     @Override
     public void runOpMode() {
+        wheelF = hardwareMap.dcMotor.get("wheelF");
+        wheelB = hardwareMap.dcMotor.get("wheelB");
         wheelR = hardwareMap.dcMotor.get("wheelR");
         wheelL = hardwareMap.dcMotor.get("wheelL");
-        intake = hardwareMap.dcMotor.get("launcher");
-        launcher = hardwareMap.dcMotor.get("intake");
-        intakeServo =  hardwareMap.servo.get("servo_1");
-        beaconPresser = hardwareMap.servo.get("servo_2");
 
-        wheelL.setDirection(DcMotorSimple.Direction.REVERSE);//This motor is pointing the wrong direction
+        wheelL.setDirection(DcMotorSimple.Direction.REVERSE);
+        wheelF.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        runtime = new ElapsedTime();
+        double rp;
+        double lp;
+        double fp;
+        double bp;
+        waitForStart();
 
-        // If there are encoders connected, switch to RUN_USING_ENCODER mode for greater accuracy
-        // robot.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        // robot.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        while(opModeIsActive()) {
 
-        beaconPresser.setPosition(1);
+            rp = ((double)gamepad1.right_stick_x)*0.5;
+            lp = ((double)gamepad1.right_stick_x)*0.5;
+            fp = ((double)-gamepad1.right_stick_y)*0.5;
+            bp = ((double)-gamepad1.right_stick_y)*0.5;
 
+            fp += ((double)gamepad1.left_stick_x)*0.5;
+            bp -= ((double)gamepad1.left_stick_x)*0.5;
+            lp += ((double)gamepad1.left_stick_x)*0.5;
+            rp -= ((double)gamepad1.left_stick_x)*0.5;
 
-        intake.setPower(0.5);
-        //wheels
-        while (opModeIsActive()) {
+            wheelB.setPower(bp);
+            wheelF.setPower(fp);
+            wheelL.setPower(lp);
+            wheelR.setPower(rp);
 
-            check();
-            //shooter
-            if (gamepad1.a) {
-                launcher.setPower(-0.36);
-                runtime.reset();
-                while(opModeIsActive() && runtime.seconds() < 3) {
-                    check();
-                }
-                intakeServo.setPosition(1);
-                runtime.reset();
-                while (opModeIsActive() && runtime.seconds() < 2) {
-                    check();
-                }
-                wheelL.setPower(0);
-                wheelR.setPower(0);
-                runtime.reset();
-                while (opModeIsActive() && runtime.seconds() < 3) {
-                    check();
-                }
-                intakeServo.setPosition(0);
-                launcher.setPower(0);
-            }
         }
-    }
-    public void check() {
-        float throttle = gamepad1.left_stick_y;
-        float direction = -gamepad1.left_stick_x;
-        float right = throttle - direction;
-        float left = throttle + direction;
-        wheelR.setPower(right);
-        wheelL.setPower(left);
-
-        if (gamepad1.dpad_left) {
-            beaconPresser.setPosition(0.2);
-        }
-        if (gamepad1.dpad_right) {
-            beaconPresser.setPosition(1);
-        }
-        telemetry.addLine("...");
     }
 }
