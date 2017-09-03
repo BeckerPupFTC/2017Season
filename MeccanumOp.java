@@ -92,7 +92,6 @@ public class MeccanumOp extends LinearOpMode
             wheelF.setPower(fp);
             wheelL.setPower(lp);
             wheelR.setPower(rp);
-
         }
     }
 }
